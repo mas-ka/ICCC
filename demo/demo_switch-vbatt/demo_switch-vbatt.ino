@@ -78,9 +78,9 @@ void loop() {
   } else {
     count_sw = 0;
   }
-  if ((count_sw > 3)                 // 電源スイッチが押下され続けた
-     || (millis() - ms_APO > 15000)   // 自動パワーOFF時刻となった
-     || (!is_battery_OK())) {         // バッテリー残量が少なかった
+  if ((count_sw > 3) ||                 // 電源スイッチが押下され続けた
+      (!is_battery_OK()) ||             // バッテリー残量が少なかった
+      (millis() - ms_APO > 15000)) {   // 自動パワーOFF時刻となった
     if (is_buzzer_ON) { // ブザーが鳴っているなら
       //noTone(BZ_PIN);               // ブザーを明示的に停止する
       delay(1000);                  // 1秒ほど間を開ける
@@ -109,7 +109,9 @@ void loop() {
  * バッテリー電圧が0.9V以下ならfalseを返す
 */
 boolean is_battery_OK() {
-  float v_batt = 1.1 * analogRead(VB_PIN) / 1024.0 ; // VB_PINのADC値を電圧に変換
+  unsigned long sum = 0;
+  for (int i = 0 ; i < 10 ; i++) sum += analogRead(VB_PIN); // 安定のため10回測定して平均を取る
+  float v_batt = 1.1 * sum / 10240.0 ; // VB_PINのADC値を電圧に変換
   //float v_batt = 3.2;
   return (v_batt > 0.9); // バッテリー電圧が0.9V超ならTRUEを返す
 }
