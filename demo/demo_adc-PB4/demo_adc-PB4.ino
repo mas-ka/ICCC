@@ -1,25 +1,26 @@
 /* demo ICCC(ATTiny85) テスト検知のコードデモ */
 
 // ソフトウェアシリアル
-//#include <SoftwareSerial.h>
-//#define RX_PIN 1   // USB-シリアル変換モジュールのTXへつなぐ
-//#define TX_PIN 0   // USB-シリアル変換モジュールのRXへつなぐ
-//SoftwareSerial mySerial(RX_PIN, TX_PIN);    // RX,TXの割り当て
+#include <SoftwareSerial.h>
+#define RX_PIN 1   // USB-シリアル変換モジュールのTXへつなぐ
+#define TX_PIN 0   // USB-シリアル変換モジュールのRXへつなぐ
+SoftwareSerial mySerial(RX_PIN, TX_PIN);    // RX,TXの割り当て
 
 // ピンアサイン
 #define BZ_PIN  2   // ブザー出力
-#define TEST_PIN  A2  // テストリード電圧（PB4はA2）
+#define TEST_PIN  A3  // テストリード電圧（PB3はA3）
 
 unsigned long V = 0L;
+unsigned int v[100];
 
 void setup() {
   // ソフトウェアシリアルの起動
-  //mySerial.begin(9600); 
-  //mySerial.println("ICCC(ATtiny85) start");
+  mySerial.begin(9600); 
+  mySerial.println("ICCC(ATtiny85) start");
 
   // ピンアサイン
-  pinMode(BZ_PIN, OUTPUT);
-  digitalWrite(BZ_PIN, LOW);
+  //pinMode(BZ_PIN, OUTPUT);
+  //digitalWrite(BZ_PIN, LOW);
   
   // ADC設定
   analogReference(INTERNAL);  // 基準電圧を内部1.1Vに設定
@@ -30,14 +31,24 @@ void setup() {
 
 void loop() {
 
-  V = readVTest();
+  double avr = 0;
+  for (int i = 0 ; i < 100 ; i++) {
+    v[i] = analogRead(TEST_PIN);
+    avr += v[i];
+  }
+  avr = avr / 100.0;
+
+  double var = 0;
+  for (int i = 0 ; i < 100 ; i++) {
+    var += (v[i] - avr) * (v[i] - avr);
+  }
+  var /= 100;
+
   
-  //mySerial.println(V);
 
-  digitalWrite(BZ_PIN, (V<100)?HIGH:LOW);
+  mySerial.print(avr); mySerial.print(", "); mySerial.println(var);  
 
-
-  delay(50);
+  delay(500);
 }
 
 /*
