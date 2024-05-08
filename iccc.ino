@@ -19,6 +19,7 @@
 // 変数
 #define TONE_HIGH 2888 // 高音の周波数 (@1MHz)
 #define TONE_LOW  736  // 低音の周波数 (@1MHz)
+#define MS_AUTO_POWER_OFF 60000 // 自動電源オフまでのミリ秒
 unsigned int count_sw; // スイッチ押下カウンタ
 unsigned long ms_last_event; // 最後にテスター検知をした時刻
 double adc_test; // テスターのADC値
@@ -69,7 +70,7 @@ void loop() {
   }
 
   // 自動電源オフのチェック
-  if (millis() - ms_last_event > 30000) { // 最後のテスター検知から30秒以上経過した
+  if (millis() - ms_last_event > MS_AUTO_POWER_OFF) { // 最後のテスター検知から「自動電源オフ」ミリ秒以上経過した
     noTone(BZ_PIN); delay(200); // 一旦ブザーを止める
     tone(BZ_PIN, TONE_HIGH, 1000); delay(1250); // 高音で1秒発音 
     noTone(BZ_PIN); // 一旦ブザーを止める
