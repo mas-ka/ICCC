@@ -2,13 +2,14 @@
 
 // ソフトウェアシリアル
 #include <SoftwareSerial.h>
-#define RX_PIN 1   // USB-シリアル変換モジュールのTXへつなぐ
-#define TX_PIN 0   // USB-シリアル変換モジュールのRXへつなぐ
+#define RX_PIN 0   // USB-シリアル変換モジュールのTXへつなぐ
+#define TX_PIN 1   // USB-シリアル変換モジュールのRXへつなぐ
 SoftwareSerial mySerial(RX_PIN, TX_PIN);    // RX,TXの割り当て
 
 // ピンアサイン
-#define BZ_PIN  2   // ブザー出力
-#define TEST_PIN  A3  // テストリード電圧（PB3はA3）
+#define BZ_PIN  0   // ブザー出力
+#define EN_PIN  2   // 電源許可
+#define TEST_PIN  A2  // テストリード電圧（PB4はA2）
 
 unsigned long V = 0L;
 unsigned int v[100];
@@ -19,8 +20,8 @@ void setup() {
   mySerial.println("ICCC(ATtiny85) start");
 
   // ピンアサイン
-  //pinMode(BZ_PIN, OUTPUT);
-  //digitalWrite(BZ_PIN, LOW);
+  pinMode(EN_PIN, OUTPUT);
+  digitalWrite(EN_PIN, HIGH);
   
   // ADC設定
   analogReference(INTERNAL);  // 基準電圧を内部1.1Vに設定
