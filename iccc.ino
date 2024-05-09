@@ -53,8 +53,10 @@ void setup() {
   count_sw = 0;
   ms_last_event = millis();
 
-  // 準備完了
-  delay(500);
+  // 準備完了のブザー
+  noTone(BZ_PIN); delay(50); // 一旦ブザーを止める
+  tone(BZ_PIN, TONE_HIGH, 250);
+  delay(1000);
 }
 
 void loop() {
