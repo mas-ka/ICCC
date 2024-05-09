@@ -32,22 +32,34 @@ void setup() {
   // ピンアサイン
   pinMode(SW_PIN, INPUT);
   pinMode(EN_PIN, OUTPUT);
+
+  // 起動時のバッテリー電圧チェック  
+  digitalWrite(EN_PIN, HIGH);   // とりあえず電源許可を出す
+  analogReference(DEFAULT);     // ADC基準電圧をVCC+5Vに設定
+  delay(100);                   // 100ミリ秒待つ
+  if (readVBatt(5.0) < 1.7) {      // バッテリー電圧が1.7V未満だった
+    noTone(BZ_PIN); delay(200); // 一旦ブザーを止める
+    tone(BZ_PIN, TONE_LOW, 240); delay(250); tone(BZ_PIN, TONE_HIGH, 240); delay(250); 
+    tone(BZ_PIN, TONE_LOW, 240); delay(250); tone(BZ_PIN, TONE_HIGH, 240); delay(250); 
+    noTone(BZ_PIN);             // 一旦ブザーを止める
+    digitalWrite(EN_PIN, LOW);  // 電源許可を停止
+    while(1){;}                 // 停止まで無期限待機
+  }
   
   // ADC設定
-  analogReference(INTERNAL);  // 基準電圧を内部1.1Vに設定
+  analogReference(INTERNAL);  // あらためてADC基準電圧を内部1.1Vに設定
 
   // 変数のセット
   count_sw = 0;
   ms_last_event = millis();
 
-  // 準備完了  
-  digitalWrite(EN_PIN, HIGH); // とりあえず電源許可を出す
+  // 準備完了
   delay(500);
 }
 
 void loop() {
   // バッテリー残量のチェック
-  if (readVBatt() < 0.9) {// バッテリー残量が0.9V未満となった
+  if (readVBatt(1.1) < 0.9) {// バッテリー残量が0.9V未満となった
     noTone(BZ_PIN); delay(200); // 一旦ブザーを止める
     tone(BZ_PIN, TONE_LOW, 240); delay(250); tone(BZ_PIN, TONE_HIGH, 240); delay(250); 
     tone(BZ_PIN, TONE_LOW, 240); delay(250); tone(BZ_PIN, TONE_HIGH, 240); delay(250); 
@@ -97,10 +109,10 @@ void loop() {
 /*
  * バッテリー電圧の取得（内部基準電圧1.1V以上は全て1.1を返す）
 */
-double readVBatt() {
+double readVBatt(double vref) {
   unsigned long sum = 0L;
   for (int i= 0 ; i < 10 ; i++) sum += analogRead(VBATT_PIN);
-  return (1.1 * sum / 10240);  
+  return (vref * sum / 10240);  
 }
 
 /*
